@@ -16,14 +16,20 @@ while True:
     # 接收数据:
 
     data, addr = s.recvfrom(1024)
-    print('Received from %s:%s.' % addr)
+    print('connect from %s:%s.' % addr)
 
     clientA=data[:3]
     clientB=data[5:8]
+    print('data is:     %s.' % data)
+    if data == b'hello':
+        print('--------- from %s:%s.' % addr)
+        continue
     print('clientA:%s  clientB:%s' % (data[:3],data[5:8]))
     if data[8:12] == b'quit':
         s.sendto(data[8:12], addr)
-        del clients[clientA]
+        if clients.has_key(clientA):
+            del clients[clientA]
+            print('delete %s'% clientA)
     elif clients.has_key(clientA):
         print('1111111111')
         print(' %s: is exist '%clientA + ', addr is:  %s:%s' %clients[clientA][0] )
