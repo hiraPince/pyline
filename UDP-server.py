@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import socket
+import re
 global a
 global b
 a=''
@@ -18,40 +19,59 @@ while True:
     data, addr = s.recvfrom(1024)
     print('connect from %s:%s.' % addr)
 
-    clientA=data[:3]
-    clientB=data[5:8]
+
     print('data is:     %s.' % data)
     if data == b'hello':
         print('--------- from %s:%s.' % addr)
         continue
-    print('clientA:%s  clientB:%s' % (data[:3],data[5:8]))
-    if data[8:12] == b'quit':
-        s.sendto(data[8:12], addr)
+    patternA = re.compile(b"(?<=<).+?(?= to)")#匹配查找clientA 名字
+    clientA=re.search(patternA, data).group(0)
+
+    patternB = re.compile(b"(?<=to ).+?(?=>)") #匹配查找clientB 名字
+    clientB = re.search(patternB, data).group(0)
+    print('clientA:%s  clientB:%s' % (clientA,clientB))
+
+    patternheader=re.compile(b"(?<=<).+?(?=>)")
+    if re.search(patternheader, data)!=None:
+         header=re.search(patternheader, data).group(0)
+
+    pattern_quit = re.compile(b"<!quit>")
+    patterndata = re.compile(b"(?<=data=).+")   #匹配是否有有效数据
+
+    if re.search(pattern_quit,data)!=None: #如果匹配到有quit,就执行退出操作并删除用户
+        s.sendto(data, addr)
         if clients.has_key(clientA):
             del clients[clientA]
             print('delete %s'% clientA)
+
+
+    elif re.search(patterndata,data)==None:
+        continue
+
+
     elif clients.has_key(clientA):
         print('1111111111')
         print(' %s: is exist '%clientA + ', addr is:  %s:%s' %clients[clientA][0] )
         if clients.has_key(clientB):
             print('--11--clientB  exist !')
             print('send to name is %s '%clientB + ',addr is:  %s:%s.'%clients[clientB][0])
-            s.sendto(b'%s' % data[8:], clients[clientB][0])
+            s.sendto(b'%s' % data, clients[clientB][0])
         else:
             print('--11--clientB not exist !')
             s.sendto(b'%s not online!' % clientB, clients[clientA][0])
+
+
     elif  not clients.has_key(clientA):
+
         print('22222222')
         print(' %s is not exist ' % clientA)
-        s.sendto(b'welcome %s' %clientA , addr)
+        s.sendto(header+b'welcome %s' %clientA , addr)
         clients[clientA]=[addr,data]
-        #clients[clientA][0]= addr
-        #clients[clientA][1]= data
         if clients.has_key(clientB):
             print('--22--clientB  exist !')
-            s.sendto(b'%s' % data[8:], clients[clientB][0])
+            s.sendto(b'%s' % data, clients[clientB][0])
         else:
             print('--22--clientB not exist !')
             #print('welcome:%s ' % clientB)
-            s.sendto(b'%s not online!' % clientB, clients[clientA][0])
+            s.sendto(header+b'%s not online!' % clientB, clients[clientA][0])
 
