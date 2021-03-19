@@ -15,7 +15,7 @@ class chat:
         self.s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.root = Tk()
         self.root.title("Hi Chat")
-        self.root.geometry('380x470')
+        self.root.geometry('500x570')
         self.frm = Frame(self.root)
 
         #top
@@ -23,7 +23,7 @@ class chat:
 
         #Entry for Master name
         self.master = StringVar()
-        self.MasterEntry = Entry(self.frm_T, textvariable = self.master,width=8,font=('Verdana', 15))
+        self.MasterEntry = Entry(self.frm_T, textvariable = self.master,width=8,font=('Verdana', 15),bg='turquoise')
         self.master.set("bbb")
         self.MasterEntry.pack(side=LEFT)
 
@@ -32,7 +32,7 @@ class chat:
 
         #client name
         self.client = StringVar()
-        self.ClientEntry = Entry(self.frm_T, textvariable = self.client,width=8, font=('Verdana', 15))
+        self.ClientEntry = Entry(self.frm_T, textvariable = self.client,width=8, font=('Verdana', 15),bg='silver')
         self.client.set("aaa")
         self.ClientEntry.pack(side=RIGHT)
         self.frm_T.pack()
@@ -40,6 +40,8 @@ class chat:
         #middle
         self.frm_M = Frame(self.frm)
         self.t_show = Text(self.frm_M, width=20, height=15, font=('Verdana', 15))
+        self.t_show.tag_config('m', foreground='turquoise')
+        self.t_show.tag_config('c', foreground='silver')
         self.t_show.insert('1.0', '')
         self.t_show.pack(fill=BOTH)
         self.chat = StringVar()
@@ -52,6 +54,7 @@ class chat:
         self.frm_MB = Frame(self.frm)
         self.SendButton=Button(self.frm_MB, text="发送",width=14, command=self.send).pack(side=LEFT)
         self.ExitButton=Button(self.frm_MB, text="退出", command=self.exit).pack(side=RIGHT)
+        #self.SendButton.grid(row=0,column=0,sticky=EW,pady=3,padx=3)
         self.frm_MB.pack()
         self.frm.pack()
 
@@ -70,18 +73,19 @@ class chat:
         # 发送数据:
         # s.sendto(data, ('172.93.34.44', 9999))
         if self.master.get()=='':
-            self.t_show.insert(END,'请输入您的姓名！\n')
+            self.t_show.insert(END,'请输入您的姓名！\n','m')
             return
 
         if self.client.get() == '':
-            self.t_show.insert(END, '请输入对方姓名！\n')
+            self.t_show.insert(END, '请输入对方姓名！\n','m')
             return
 
         tmpdata=b'<'+self.master.get().encode('utf-8')+b' to '+self.client.get().encode('utf-8')+b'>data='+self.chat.get().encode('utf-8')
         print('send data is: %s'% tmpdata)
         self.s.sendto(tmpdata, self.ADDR)
         # s.sendto(sendvar.get().encode('utf-8'), ('172.93.34.44', 9999))
-        self.t_show.insert(END, '  ' + self.chat.get() + ':' + self.master.get() + '\n')
+        #self.t_show.insert(END, '  ' + self.chat.get() + ':' + self.master.get() + '\n','m')
+        self.t_show.insert(END, self.chat.get() + '\n\n', 'm')
         self.chat.set('')
 
     def exit(self):
@@ -107,7 +111,10 @@ class chat:
             if re.search(re.compile(b"(?<=<).+?(?= to)"), self.rec)!=None:
                 clientname = re.search(re.compile(b"(?<=<).+?(?= to)"), self.rec).group(0).decode('utf-8')
                 if re.search(re.compile(b"(?<=data=).+"),self.rec)!=None:
-                    self.t_show.insert(END,clientname+':'+re.search(re.compile(b"(?<=data=).+"),self.rec).group(0).decode('utf-8')+'\n')
+                    #带有谁发送提示
+                    #self.t_show.insert(END,clientname+':'+re.search(re.compile(b"(?<=data=).+"),self.rec).group(0).decode('utf-8')+'\n','a')
+                    self.t_show.insert(END,re.search(re.compile(b"(?<=data=).+"),self.rec).group(0).decode('utf-8')+'\n\n','c')
+
                     if self.master.get()!=clientname:   #防止自己跟自己聊天
                         self.client.set(clientname)
 
