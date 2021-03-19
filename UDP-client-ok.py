@@ -4,7 +4,7 @@ from tkinter import *
 import time, threading
 #import tkinter.messagebox as messagebox
 import re
-
+from tkinter.scrolledtext import ScrolledText
 class chat:
     #HOST = '172.28.32.140'
     HOST ='172.93.34.44'
@@ -15,7 +15,7 @@ class chat:
         self.s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.root = Tk()
         self.root.title("Hi Chat")
-        self.root.geometry('500x570')
+        self.root.geometry('440x670')
         self.frm = Frame(self.root)
 
         #top
@@ -39,11 +39,15 @@ class chat:
 
         #middle
         self.frm_M = Frame(self.frm)
-        self.t_show = Text(self.frm_M, width=20, height=15, font=('Verdana', 15))
+        #self.t_show = Text(self.frm_M, width=20, height=15, font=('Verdana', 15))
+        self.t_show = ScrolledText(self.frm_M, width=40, height=30,font=('Verdana', 12), background='#ffffff')
+
         self.t_show.tag_config('m', foreground='turquoise')
         self.t_show.tag_config('c', foreground='silver')
         self.t_show.insert('1.0', '')
-        self.t_show.pack(fill=BOTH)
+        #self.t_show.pack(fill=BOTH)
+        #self.t_show.see(END)
+        self.t_show.pack(expand=1, fill="both")
         self.chat = StringVar()
         self.ChatEntry = Entry(self.frm_M, textvariable = self.chat,width=8, font=('Verdana', 15))
         self.chat.set("Enter message")
@@ -86,6 +90,7 @@ class chat:
         # s.sendto(sendvar.get().encode('utf-8'), ('172.93.34.44', 9999))
         #self.t_show.insert(END, '  ' + self.chat.get() + ':' + self.master.get() + '\n','m')
         self.t_show.insert(END, self.chat.get() + '\n\n', 'm')
+        self.t_show.see(END)
         self.chat.set('')
 
     def exit(self):
@@ -114,11 +119,9 @@ class chat:
                     #带有谁发送提示
                     #self.t_show.insert(END,clientname+':'+re.search(re.compile(b"(?<=data=).+"),self.rec).group(0).decode('utf-8')+'\n','a')
                     self.t_show.insert(END,re.search(re.compile(b"(?<=data=).+"),self.rec).group(0).decode('utf-8')+'\n\n','c')
-
+                    self.t_show.see(END)
                     if self.master.get()!=clientname:   #防止自己跟自己聊天
                         self.client.set(clientname)
-
-
 
 
 def main():
