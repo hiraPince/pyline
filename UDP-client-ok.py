@@ -49,9 +49,11 @@ class chat:
         #self.t_show.see(END)
         self.t_show.pack(expand=1, fill="both")
         self.chat = StringVar()
-        self.ChatEntry = Entry(self.frm_M, textvariable = self.chat,width=8, font=('Verdana', 15))
+        self.ChatEntry = Entry(self.frm_M, textvariable = self.chat,width=8, font=('Verdana', 15),foreground='gray')
         self.chat.set("Enter message")
-        self.ChatEntry.bind('<Key-Return>', self.enter_send)
+        self.ChatEntry.bind('<Key-Return>', self.enter_send)#bind enter键按下事件
+        self.ChatEntry.bind('<FocusIn>', self.chat_cursor_enter)#bind 光标进入事件
+        self.ChatEntry.bind('<FocusOut>', self.chat_cursor_leave) #bind 光标离开事件
         self.ChatEntry.pack(fill=BOTH)
         self.frm_M.pack()
 
@@ -69,6 +71,14 @@ class chat:
         self.t = threading.Thread(target=self.recv_loop, name='LoopThread')
         self.t.start()
         #self.root.mainloop()
+    def chat_cursor_enter(self,event):
+        if self.chat.get()=='Enter message' or self.chat.get()=='':
+            self.chat.set("")
+        self.ChatEntry['foreground'] = 'black'#重新设置Entry字体颜色
+    def chat_cursor_leave(self,event):
+        self.ChatEntry['foreground'] = 'gray' #重新设置Entry字体颜色
+        if self.chat.get()=='Enter message' or self.chat.get()=='': #如果输入框里面有输入内容则不使用默认语句覆盖
+            self.chat.set("Enter message")
 
 
     # def send(self):
