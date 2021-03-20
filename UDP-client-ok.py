@@ -32,7 +32,7 @@ class chat:
 
         #client name
         self.client = StringVar()
-        self.ClientEntry = Entry(self.frm_T, textvariable = self.client,width=8, font=('Verdana', 15),bg='silver')
+        self.ClientEntry = Entry(self.frm_T, textvariable = self.client,width=8, font=('Verdana', 15),bg='yellowgreen')
         self.client.set("aaa")
         self.ClientEntry.pack(side=RIGHT)
         self.frm_T.pack()
@@ -43,7 +43,7 @@ class chat:
         self.t_show = ScrolledText(self.frm_M, width=40, height=30,font=('Verdana', 12), background='#ffffff')
 
         self.t_show.tag_config('m', foreground='turquoise')
-        self.t_show.tag_config('c', foreground='silver')
+        self.t_show.tag_config('c', foreground='yellowgreen')
         self.t_show.insert('1.0', '')
         #self.t_show.pack(fill=BOTH)
         #self.t_show.see(END)
@@ -51,6 +51,7 @@ class chat:
         self.chat = StringVar()
         self.ChatEntry = Entry(self.frm_M, textvariable = self.chat,width=8, font=('Verdana', 15))
         self.chat.set("Enter message")
+        self.ChatEntry.bind('<Key-Return>', self.enter_send)
         self.ChatEntry.pack(fill=BOTH)
         self.frm_M.pack()
 
@@ -72,6 +73,9 @@ class chat:
 
     # def send(self):
     #     print('test!')
+    def enter_send(self,event):
+        print('按下Enter: ' + event.char)
+        self.send()
 
     def send(self):
         # 发送数据:
@@ -83,6 +87,8 @@ class chat:
         if self.client.get() == '':
             self.t_show.insert(END, '请输入对方姓名！\n','m')
             return
+        #self.DefaultMaster=self.master.get()
+        #self.DefaultClient=self.master.get()
 
         tmpdata=b'<'+self.master.get().encode('utf-8')+b' to '+self.client.get().encode('utf-8')+b'>data='+self.chat.get().encode('utf-8')
         print('send data is: %s'% tmpdata)
@@ -90,7 +96,7 @@ class chat:
         # s.sendto(sendvar.get().encode('utf-8'), ('172.93.34.44', 9999))
         #self.t_show.insert(END, '  ' + self.chat.get() + ':' + self.master.get() + '\n','m')
         self.t_show.insert(END, self.chat.get() + '\n\n', 'm')
-        self.t_show.see(END)
+        self.t_show.see(END)  #让滚动条一直处于最下端
         self.chat.set('')
 
     def exit(self):
@@ -119,7 +125,7 @@ class chat:
                     #带有谁发送提示
                     #self.t_show.insert(END,clientname+':'+re.search(re.compile(b"(?<=data=).+"),self.rec).group(0).decode('utf-8')+'\n','a')
                     self.t_show.insert(END,re.search(re.compile(b"(?<=data=).+"),self.rec).group(0).decode('utf-8')+'\n\n','c')
-                    self.t_show.see(END)
+                    self.t_show.see(END) #让滚动条一直处于最下端
                     if self.master.get()!=clientname:   #防止自己跟自己聊天
                         self.client.set(clientname)
 
