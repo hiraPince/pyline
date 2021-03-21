@@ -18,7 +18,7 @@ while True:
 
     data, addr = s.recvfrom(1024)
     print('connect from %s:%s.' % addr)
-    print('data is:*************  %s.' % data)
+    print('data is:  %s.' % data)
     if data == b'hello':               #登陆时候欢迎
         print('--------- from %s:%s.' % addr)
         continue
@@ -52,6 +52,8 @@ while True:
 
     if clients.has_key(clientA):   #clientA 存在的情况
         print('1111111111')
+        if clients[clientA][0]!=addr:
+            clients[clientA][0] = addr #这里解决当客户端非正常退出造成用户无法删除，客户再登陆的时候通讯addr还是上次的，无法通讯问题
         print(' %s: is exist '%clientA + ', addr is:  %s:%s' %clients[clientA][0] )
         if clients.has_key(clientB):    #clientB 存在的情况
             print('--11--clientB %s exist !'%clientB)
