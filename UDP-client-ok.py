@@ -5,13 +5,16 @@ import time, threading
 # import tkinter.messagebox as messagebox
 import re
 from tkinter.scrolledtext import ScrolledText
-
+import os
+import random
+from PIL import Image, ImageSequence
 
 class chat:
     # HOST = '172.28.32.140'
     HOST = '172.93.34.44'
     PORT = 9999
     ADDR = (HOST, PORT)
+    tmp=0
 
     def __init__(self):
         self.s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -51,7 +54,7 @@ class chat:
         self.ExitButton = Button(self.root, text="退出", width=8, command=self.exit, padx=5)
 
         #图片显示
-        self.photo = PhotoImage(file='p3m.png')
+        self.photo = PhotoImage(file='./gif/xiaoqie.gif')
         self.labelimage = Label(image=self.photo)
         self.labelimage.image = self.photo
 
@@ -71,8 +74,67 @@ class chat:
         self.t.setDaemon(True)  # 设置为守护线程，守护进程有个好处就是主进程结束，自动结束，解决之前窗口强制退出报错问题
         self.t.start()
 
+        self.t = threading.Thread(target=self.flash, name='ImageThread')
+        self.t.setDaemon(True)  # 设置为守护线程，守护进程有个好处就是主进程结束，自动结束，解决之前窗口强制退出报错问题
+        self.t.start()
         # self.root.mainloop()
 
+    def flash(self):
+        # PhotoImage(file='F:/wuyongxiang/laoying/images/' + str(tmp) + '.gif')
+        #files = os.listdir('F:/wuyongxiang/study/python/untitled1/gif/xiaoqie/')
+        files = os.listdir('./gif/xiaoqie/')
+        print(files)
+        files.sort(key=lambda x: int(x[:-4]))  # 使用sort 的key 的lambda  按大小进行排序
+        print(files)
+        photos = [PhotoImage(file='./gif/xiaoqie/' + filet) for filet in files]
+        # print('F:/wuyongxiang/laoying/images/'+file)
+        print('photos is : %d' % len(photos))
+        #time.sleep(1)
+        while True:
+            self.tmp = self.tmp + 1
+            for photo in photos:
+                print('%s ' % photo)
+
+                self.labelimage.configure(image=photo) #这样就可以不在使用grid重新排版添加控件，如此节省资源
+                self.labelimage.image = photo
+                #self.labelimage.grid(row=0, column=0, rowspan=2, columnspan=2)   #不在需要重新布局，这样太占资源
+                #self.labelimage1.grid(row=1, column=3, columnspan=2, rowspan=1, sticky=W + E + N + S)
+                a=random.uniform(0.1, 0.4) #随机产生浮点数 0.1-0.4之间
+                #print('aaaaaaaaaaaaaaaaaaaaa %f'%a)
+                time.sleep(a)
+                del photo
+            if self.tmp > 2:
+                del photos
+                files = os.listdir('./gif/xiaoqie/')
+                # print(files)
+                files.sort(key=lambda x: int(x[:-4]))  # 使用sort 的key 的lambda  按大小进行排序
+                # print(files)
+                # photos=[0]
+                photos = [PhotoImage(file='./gif/xiaoqie/' + filet) for filet in
+                          files]
+                # print('F:/wuyongxiang/laoying/images/'+file)
+                # print('photos is : %d' % len(photos))
+
+                print('--------------------------')
+                self.tmp = 0
+                with Image.open('./gif/xiaoqie.gif') as im:
+                    if im.is_animated:
+                        frames = [f.copy() for f in ImageSequence.Iterator(im)]
+                        # frames.reverse() # 内置列表倒序方法
+                        # frames.reverse()
+                        random.shuffle(frames)
+                        frames[0].save('./gif/xiaoqie.gif', save_all=True,
+                                       append_images=frames[1:])
+
+                im = Image.open("./gif/xiaoqie.gif")
+                im.save("./gif/xiaoqie/0.gif")
+                while True:
+                    try:
+                        seq = im.tell()
+                        im.seek(seq + 1)
+                        im.save("./gif/xiaoqie/%s.gif" % (seq), quality=100)
+                    except EOFError:
+                        break
     def chat_cursor_enter(self, event):
         if self.chat.get() == 'Enter message' or self.chat.get() == '':
             self.chat.set("")
